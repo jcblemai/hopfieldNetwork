@@ -158,6 +158,4 @@ class hopfield_network:
             x_old = copy(self.x)
             sleep(0.5)
         print 'pattern recovered in %i time steps with final overlap %.3f'%(i_fin,overlap[-1])
-            
-        
    
