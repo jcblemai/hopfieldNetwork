@@ -67,7 +67,6 @@ class hopfield_network:
 
         -L.Ziegler 03.2009.
         """
-
         h = sum(self.weight*self.x,axis=1)
         self.x = sign(h)
 

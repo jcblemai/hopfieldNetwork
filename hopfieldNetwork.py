@@ -1,12 +1,12 @@
 from PIL import Image
 from copy import copy
-from time import sleep
+import time
 from pylab import *
 import numpy as np
-
+import os
 plot_dic={'cmap':cm.gray,'interpolation':'nearest'}
 
-tmax = 20
+tmax = 100
 
 class hopfieldNetwork:
     def __init__(self,N):
@@ -31,7 +31,7 @@ class hopfieldNetwork:
                 
 
     def overlap(self, mu):
-        return (1/self.N)*sum(self.x*self.pattern[mu])
+        return ((1./self.N)*sum(self.x*self.pattern[mu]))
         
     def grid(self,mu=None):
         if mu is not None:
@@ -39,6 +39,13 @@ class hopfieldNetwork:
         else:
             x_grid = reshape(self.x,(self.N,1))
         return x_grid
+    
+    def dynamic(self,i):
+        """
+        """
+
+        h = sum(self.weight[i]*self.x)
+        self.x[i] = sign(h)
     
     
     def run(self,mu=0,flip_ratio=0):
@@ -57,7 +64,7 @@ class hopfieldNetwork:
         
         t = [0]
         overlap = [self.overlap(mu)]
-        
+        print overlap
         # prepare the figure
         figure()
         
@@ -82,30 +89,38 @@ class hopfieldNetwork:
         
         # this forces pylab to update and show the fig.
         draw()
-        #x_old = copy(self.x)
+        x_old = copy(self.x)
         
-        #for i in range(tmax):
-
-            ## run a step
-            #self.dynamic()
-            #t.append(i+1)
-            #overlap.append(self.overlap(mu))
+        for i in range(tmax):
+            print i
+            # run a step
+            flip = permutation(arange(self.N))
+            for k in flip:
+                self.dynamic(k)
+            t.append(i+1)
+            overlap.append(self.overlap(mu))
             
-            ## update the plotted data
-            #g1.set_data(self.grid())
-            #g2.set_data(t,overlap)
-            
-            ## update the figure so that we see the changes
-        #draw()
+            # update the plotted data
+            g1.set_data(self.grid())
+            g2.set_data(t,overlap)
 
-            ## check the exit condition
-            #i_fin = i+1
-            #if sum(abs(x_old-self.x))==0:
-                #break
-            #x_old = copy(self.x)
-            #sleep(0.5)
-        #print 'pattern recovered in %i time steps with final overlap %.3f'%(i_fin,overlap[-1])
-if __name__ == "__main__":
+            # update the figure so that we see the changes
+            draw()
+
+            # check the exit condition
+            i_fin = i+1
+            if sum(abs(x_old-self.x))==0:
+                break
+            x_old = copy(self.x)
+            time.sleep(1)
+            #os.system("pause")
+            print i_fin
+        print 'pattern recovered in %i time steps with final overlap %.3f'%(i_fin,overlap[-1])
+        
+def test():
     h = hopfieldNetwork(200)
-    h.makePattern()
-    h.run(flip_ratio=0)
+    h.makePattern(P=5)
+    h.run(flip_ratio=0.2)
+        
+#if __name__ == "__main__":
+
