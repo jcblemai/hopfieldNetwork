@@ -4,6 +4,7 @@ import time
 from pylab import *
 import numpy as np
 import os
+from scipy import stats
 plot_dic={'cmap':cm.gray,'interpolation':'nearest'}
 
 tmax = 100
@@ -32,7 +33,10 @@ class hopfieldNetwork:
 
     def overlap(self, mu):
         return ((1./self.N)*sum(self.x*self.pattern[mu]))
-        
+    
+    def pixelDistance(self, mu):
+        return 100*(1-((1./self.N)*sum(self.x*self.pattern[mu])))
+    
     def grid(self,mu=None):
         if mu is not None:
             x_grid = reshape(self.pattern[mu],(self.N,1))
@@ -64,63 +68,127 @@ class hopfieldNetwork:
         
         t = [0]
         overlap = [self.overlap(mu)]
-        print overlap
+        pixDist = [self.pixelDistance(mu)]
         # prepare the figure
-        figure()
+        #figure()
         
         # plot the current network state
-        subplot(221)
-        g1 = imshow(self.grid(),**plot_dic)# we keep a handle to the image
-        axis('off')
-        title('x')
+        #subplot(221)
+        #g1 = imshow(self.grid(),**plot_dic)# we keep a handle to the image
+        #axis('off')
+        #title('x')
         
         # plot the target pattern
-        subplot(222)
-        imshow(self.grid(mu=mu),**plot_dic)
-        axis('off')
-        title('pattern %i'%mu)
+        #subplot(222)
+        #imshow(self.grid(mu=mu),**plot_dic)
+        #axis('off')
+        #title('pattern %i'%mu)
         
         # plot the time course of the overlap
-        subplot(212)
-        g2, = plot(t,overlap,'k',lw=2) # we keep a handle to the curve
-        axis([0,tmax,-1,1])
-        xlabel('time step')
-        ylabel('overlap')
+        #subplot(212)
+        #g2, = plot(t,overlap,'k',lw=2) # we keep a handle to the curve
+        #axis([0,tmax,-1,1])
+        #xlabel('time step')
+        #ylabel('overlap')
         
         # this forces pylab to update and show the fig.
-        draw()
+        #draw()
         x_old = copy(self.x)
         
         for i in range(tmax):
-            print i
+            #print i
             # run a step
             flip = permutation(arange(self.N))
             for k in flip:
                 self.dynamic(k)
             t.append(i+1)
             overlap.append(self.overlap(mu))
+            pixDist.append(self.pixelDistance(mu))
             
             # update the plotted data
-            g1.set_data(self.grid())
-            g2.set_data(t,overlap)
+            #g1.set_data(self.grid())
+            #g2.set_data(t,overlap)
 
             # update the figure so that we see the changes
-            draw()
+            #draw()
+            
+            #print "Overlap : " , self.overlap(mu) , ", PixDist : " , self.pixelDistance(mu)
 
             # check the exit condition
             i_fin = i+1
             if sum(abs(x_old-self.x))==0:
+                return self.pixelDistance(mu)
                 break
             x_old = copy(self.x)
-            time.sleep(1)
+            #time.sleep(2)
             #os.system("pause")
-            print i_fin
-        print 'pattern recovered in %i time steps with final overlap %.3f'%(i_fin,overlap[-1])
+            #print i_fin
+        #print 'pattern recovered in %i time steps with final overlap %.3f'%(i_fin,overlap[-1]) 
+        return -1
         
 def test():
     h = hopfieldNetwork(200)
     h.makePattern(P=5)
-    h.run(flip_ratio=0.2)
+    h.run(flip_ratio=0.3)
         
+#ex1
+def patternRetrieval():
+    h = hopfieldNetwork(200)
+    file = open('patternRetrieval.dat','w')
+    h.makePattern(P=5)
+    for c in np.arange(0.01,0.51,0.01):
+        meanError = []
+        for i in range(50):
+            meanError.append(h.run(flip_ratio=c))
+        avr = np.mean(meanError)
+        stdDev = stats.sem(meanError)
+        strOut = str(c)+"  "+str(avr)+"    "+str(stdDev)+"\n"
+        print  c, "  ",avr,"    ",stdDev
+        file.write(strOut)
+    file.close()
+
+#ex1    
+def capacityEstimation():
+    file = open('CapacityEstimation.dat','w')
+    h = hopfieldNetwork(200)
+    for P in range(1,51):
+        meanError = []
+        for i in range(10):
+            h.makePattern(P)
+            meanError.append(h.run(flip_ratio=0.1))
+        avr = np.mean(meanError)
+        stdDev = stats.sem(meanError)
+        strOut = str(P)+"  "+str(avr)+"    "+str(stdDev)+"\n"
+        print  P, "  ",avr,"    ",stdDev
+        file.write(strOut)
+    file.close()
+
+#ex1    
+def maxLoad():
+    Nlist = [100,250,500]
+    for N in Nlist:
+        alphaList = []
+        for n in range(10):
+            h = hopfieldNetwork(N)
+            for P in range(1,51):
+                avrLoad = []
+                for i in range(10):
+                    meanError = []
+                    h.makePattern(P)
+                    for mu in range(P):
+                        run = h.run(mu=mu,flip_ratio=0.1)
+                        if(run != -1):
+                            meanError.append(run)
+                        else:
+                            print "ERROR NOT CONVERGING"
+                    avr = np.mean(meanError)
+                    avrLoad.append(avr)
+                if (np.mean(avrLoad) > 2):
+                    alphaList.append(P/float(N))    
+                    print "N : ", N, "Pmax : ", P ,"alphaMax : ", P/float(N)
+                    break
+        print "N : ", N, "Alpha_max : ", np.mean(alphaList), "+/- ", stats.sem(alphaList), "\n"
+            
+    
 #if __name__ == "__main__":
 
