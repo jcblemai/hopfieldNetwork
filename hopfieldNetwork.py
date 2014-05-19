@@ -5,6 +5,9 @@ from pylab import *
 import numpy as np
 import os
 from scipy import stats
+import cProfile
+
+#TODO : Check if makePattern was called without parameters
 plot_dic={'cmap':cm.gray,'interpolation':'nearest'}
 
 tmax = 100
@@ -13,7 +16,7 @@ class hopfieldNetwork:
     def __init__(self,N):
         self.N = N
     
-    def makePattern(self,P=1,ratio=0.5):
+    def makePattern(self,P,ratio):
         """
         """
         self.pattern = -np.ones((P,self.N))
@@ -21,7 +24,9 @@ class hopfieldNetwork:
         for i in range(P):
             self.pattern[i,:idx] = 1
             self.pattern[i] = np.random.permutation(self.pattern[i])
-        
+        self.makeWeight(P)
+    
+    def makeWeight(self, P):
         self.weight = np.zeros((self.N,self.N))
         for i in range(self.N):
             for j in range(self.N):
@@ -165,10 +170,10 @@ def capacityEstimation():
 
 #ex1    
 def maxLoad():
-    Nlist = [100,250,500]
+    Nlist = [100]
     for N in Nlist:
         alphaList = []
-        for n in range(10):
+        for n in range(3):
             h = hopfieldNetwork(N)
             for P in range(1,51):
                 avrLoad = []
@@ -190,5 +195,5 @@ def maxLoad():
         print "N : ", N, "Alpha_max : ", np.mean(alphaList), "+/- ", stats.sem(alphaList), "\n"
             
     
-#if __name__ == "__main__":
-
+if __name__ == "__main__":
+   cProfile.run('maxLoad()', 'maxLoad.profile')
