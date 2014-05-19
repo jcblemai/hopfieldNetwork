@@ -7,11 +7,10 @@ import os
 from scipy import stats
 import cProfile
 
-#TODO : Check if makePattern was called without parameters
 plot_dic={'cmap':cm.gray,'interpolation':'nearest'}
 
 tmax = 100
-
+frac = 0.5 #fraction of neurons in state +1 in a pattern  
 class hopfieldNetwork:
     def __init__(self,N):
         self.N = N
@@ -76,30 +75,69 @@ class hopfieldNetwork:
         t = [0]
         overlap = [self.overlap(mu)]
         pixDist = [self.pixelDistance(mu)]
+        
+        x_old = copy(self.x)
+        
+        for i in range(tmax):
+            #print i
+            # run a step
+            flip = permutation(arange(self.N))
+            for k in flip:
+                self.dynamic(k)
+            t.append(i+1)
+            overlap.append(self.overlap(mu))
+            pixDist.append(self.pixelDistance(mu))
+            
+            # check the exit condition
+            i_fin = i+1
+            if sum(abs(x_old-self.x))==0:
+                return self.pixelDistance(mu)
+                break
+            x_old = copy(self.x)
+
+        return -1
+        
+    def runAndPlot(self,mu=0,flip_ratio=0):
+        """
+        """
+        try:
+            self.pattern[mu]
+        except:
+            raise IndexError, 'pattern index too high'
+        
+        # set the initial state of the net
+        self.x = copy(self.pattern[mu])
+        flip = permutation(arange(self.N))
+        idx = int(self.N*flip_ratio)
+        self.x[flip[0:idx]] *= -1
+        
+        t = [0]
+        overlap = [self.overlap(mu)]
+        pixDist = [self.pixelDistance(mu)]
         # prepare the figure
-        #figure()
+        figure()
         
         # plot the current network state
-        #subplot(221)
-        #g1 = imshow(self.grid(),**plot_dic)# we keep a handle to the image
-        #axis('off')
-        #title('x')
+        subplot(221)
+        g1 = imshow(self.grid(),**plot_dic)# we keep a handle to the image
+        axis('off')
+        title('x')
         
         # plot the target pattern
-        #subplot(222)
-        #imshow(self.grid(mu=mu),**plot_dic)
-        #axis('off')
-        #title('pattern %i'%mu)
+        subplot(222)
+        imshow(self.grid(mu=mu),**plot_dic)
+        axis('off')
+        title('pattern %i'%mu)
         
         # plot the time course of the overlap
-        #subplot(212)
-        #g2, = plot(t,overlap,'k',lw=2) # we keep a handle to the curve
-        #axis([0,tmax,-1,1])
-        #xlabel('time step')
-        #ylabel('overlap')
+        subplot(212)
+        g2, = plot(t,overlap,'k',lw=2) # we keep a handle to the curve
+        axis([0,tmax,-1,1])
+        xlabel('time step')
+        ylabel('overlap')
         
         # this forces pylab to update and show the fig.
-        #draw()
+        draw()
         x_old = copy(self.x)
         
         for i in range(tmax):
@@ -113,11 +151,11 @@ class hopfieldNetwork:
             pixDist.append(self.pixelDistance(mu))
             
             # update the plotted data
-            #g1.set_data(self.grid())
-            #g2.set_data(t,overlap)
+            g1.set_data(self.grid())
+            g2.set_data(t,overlap)
 
             # update the figure so that we see the changes
-            #draw()
+            draw()
             
             #print "Overlap : " , self.overlap(mu) , ", PixDist : " , self.pixelDistance(mu)
 
@@ -127,22 +165,24 @@ class hopfieldNetwork:
                 return self.pixelDistance(mu)
                 break
             x_old = copy(self.x)
-            #time.sleep(2)
+            time.sleep(2)
             #os.system("pause")
             #print i_fin
         #print 'pattern recovered in %i time steps with final overlap %.3f'%(i_fin,overlap[-1]) 
         return -1
-        
+
 def test():
     h = hopfieldNetwork(200)
-    h.makePattern(P=5)
-    h.run(flip_ratio=0.3)
+    h.makePattern(P=5, ratio = frac)
+    h.runAndPlot(flip_ratio=0.3)
+    print "test done!"
         
 #ex1
 def patternRetrieval():
     h = hopfieldNetwork(200)
     file = open('patternRetrieval.dat','w')
-    h.makePattern(P=5)
+
+    h.makePattern(P=5, ratio = frac)
     for c in np.arange(0.01,0.51,0.01):
         meanError = []
         for i in range(50):
@@ -161,7 +201,7 @@ def capacityEstimation():
     for P in range(1,51):
         meanError = []
         for i in range(10):
-            h.makePattern(P)
+            h.makePattern(P, ratio = frac)
             meanError.append(h.run(flip_ratio=0.1))
         avr = np.mean(meanError)
         stdDev = stats.sem(meanError)
@@ -181,7 +221,7 @@ def maxLoad():
                 avrLoad = []
                 for i in range(10):
                     meanError = []
-                    h.makePattern(P)
+                    h.makePattern(P, frac)
                     for mu in range(P):
                         run = h.run(mu=mu,flip_ratio=0.1)
                         if(run != -1):
