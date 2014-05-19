@@ -38,12 +38,17 @@ class hopfieldNetwork:
 
     def overlap(self, mu):
         return ((1./self.N)*sum(self.x*self.pattern[mu]))
+<<<<<<< HEAD
 
+    def pixDistance(self, mu) : 
+	return 1-overlap(self, mu)
+
+=======
     
     def pixelDistance(self, mu):
         return 100*(1-((1./self.N)*sum(self.x*self.pattern[mu])))
     
-
+>>>>>>> b592885208c88c81452808da6ee81ea93a0b5400
     def grid(self,mu=None):
         if mu is not None:
             x_grid = reshape(self.pattern[mu],(self.N,1))
