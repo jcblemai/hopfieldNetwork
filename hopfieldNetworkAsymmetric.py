@@ -116,7 +116,12 @@ def transTime(lamba, tu):
 	h.initMemory()
 	return h.run(flip_ratio=0)	
 def varyTau(lamda) : 
+	meanTPerRun = []
 	meanT = []
 	for t in range(1,20) : 
-		meanT.append(transTime(lamda, t) ) 
-	print meanT
+	#for each value of tau, run simulation 5 times and take average transition time 
+		for r in range(5) : 
+			meanTPerRun.append(transTime(lamda, t) ) 
+		meanT.append(mean(meanTPerRun)) 
+		meanTPerRun = []	
+		print t, " ", meanT[t-1]
