@@ -8,7 +8,7 @@ from scipy import stats
 import cProfile
 from hopfieldNetwork import hopfieldNetwork
 
-tmax = 100
+tmax = 200
 
 def heaviside(x):
     if x == 0:
@@ -66,6 +66,9 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
         idx = int(self.N*flip_ratio)
         self.x[flip[0:idx]] *= -1
         
+        oldFit = -1
+        transitionTime = 0
+        
         t = [0]
         overlap = [self.overlap(mu)]
         pixDist = [self.pixelDistance(mu)]
@@ -77,11 +80,16 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
             
             t.append(i+1)
            # overlap.append(self.overlap(mu)) #Matrice
-            
+
             for j in range(self.P):
-                #print j, " ", self.overlap(j), "; ",
-                print " ", self.overlap(j), "; ",
-            print ""
+                #print " ", self.overlap(j), "   ",
+                if (self.overlap(j) == 1.0):
+                    if (oldFit == j):
+                        transitionTime += 1
+                    else:
+                        oldFit = j
+                        print j,":",transitionTime, " | "
+                        transitionTime = 0
             
             pixDist.append(self.pixelDistance(mu))
             
@@ -98,7 +106,14 @@ def testRun():
     h.makePattern(P=10, ratio = 0.5, lamda = 1.5)
     h.setTau(tau = 8)
     h.initMemory()
-    h.run(flip_ratio=0.3)
+    h.run(flip_ratio=0.1)
+    
+def varyLambda(lamda):
+    h = hopfieldNetworkAsymmetric(N = 500)
+    h.makePattern(P=10, ratio = 0.5, lamda=lamda)
+    h.setTau(tau = 8)
+    h.initMemory()
+    h.run(flip_ratio=0)
     
 #if __name__ == "__main__":
     
