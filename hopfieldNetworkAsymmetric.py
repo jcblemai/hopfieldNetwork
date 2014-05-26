@@ -26,11 +26,12 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
             for j in range(self.N):
                 sum = 0
                 for k in range(P-1):
-                    sum += self.pattern[k,i]*self.pattern[k+1,j]
+                    sum += self.pattern[k+1,i]*self.pattern[k,j]
                 sum += self.pattern[0,i]*self.pattern[P-1,j]        # We loop the last pattern w/ the first one.
                 self.AsymWeight[i,j] = float(lamda)/self.N * sum
                 
     def makePattern(self,P,ratio, lamda):
+	self.P = P
         hopfieldNetwork.makePattern(self, P, ratio)
         self.makeAsymmetricWeight(P, lamda)
         
@@ -77,26 +78,26 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
         t = [0]
         overlap = [self.overlap(mu)]
         pixDist = [self.pixelDistance(mu)]
-        x_old = copy(self.x)
+       # x_old = copy(self.x)
         
         for i in range(tmax):
             # run a step
-            flip = permutation(arange(self.N))
-            for k in flip:
+            #flip = permutation(arange(self.N))
+            for k in range(self.N):
                 self.dynamic(k,t[-1]) # Syncronous thing TODO
             
             t.append(i+1)
-            overlap.append(self.overlap(mu)) #Matrice
+           # overlap.append(self.overlap(mu)) #Matrice
             
-            for j in range(10):
+            for j in range(self.P):
                 print j, " ", self.overlap(j), "; ",
             print ""
             
             pixDist.append(self.pixelDistance(mu))
             
             # check the exit condition
-            i_fin = i+1
-            x_old = copy(self.x)
+            #i_fin = i+1
+           # x_old = copy(self.x)
             
         #print 'pattern recovered in %i time steps with final overlap %.3f'%(i_fin,overlap[-1]) 
         return -1
