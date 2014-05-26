@@ -8,7 +8,7 @@ from scipy import stats
 import cProfile
 from hopfieldNetwork import hopfieldNetwork
 
-tmax = 20
+tmax = 100
 
 def heaviside(x):
     if x == 0:
@@ -36,29 +36,20 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
         self.makeAsymmetricWeight(P, lamda)
         
     def initMemory(self):
-        self.SPrev = []
-        for i in range(self.N):
-            self.SPrev.append([1])
+        self.SPrev = np.ones((self.N, tmax))
             
     def functionG(self, t):
         return (1./self.tau)*heaviside(-t + self.tau)
-    
-    def dynamic(self,i,t):
-        newSbar =  []
-        for j in range(self.N):
-            Sbar = 0
-            for k in range(len(self.SPrev[j])):
-                Sbar += self.SPrev[j][t-k]*self.functionG(k)
-            newSbar.append(Sbar)
-            
-        #print newSbar
-        
-        h = 0
-        for l in range(self.N):
-            h += self.weight[i][l]*self.x[l]+ self.AsymWeight[i][l]* newSbar[l]
-        self.x[i] = sign(h)
-        self.SPrev[i].append( self.x[i])
+
        
+    def dynamicSyncrone(self,t):
+        Sbar = np.zeros(self.N)
+        for k in range(t):
+            Sbar += self.SPrev[:,t-k]*self.functionG(k)
+
+        self.x = sign(np.dot(self.weight, self.x) + np.dot(self.AsymWeight, Sbar))
+        
+        self.SPrev[:,t] = self.x
         
     def setTau(self, tau):
         self.tau = tau
@@ -82,15 +73,14 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
         
         for i in range(tmax):
             # run a step
-            #flip = permutation(arange(self.N))
-            for k in range(self.N):
-                self.dynamic(k,t[-1]) # Syncronous thing TODO
+            self.dynamicSyncrone(t[-1])
             
             t.append(i+1)
            # overlap.append(self.overlap(mu)) #Matrice
             
             for j in range(self.P):
-                print j, " ", self.overlap(j), "; ",
+                #print j, " ", self.overlap(j), "; ",
+                print " ", self.overlap(j), "; ",
             print ""
             
             pixDist.append(self.pixelDistance(mu))
