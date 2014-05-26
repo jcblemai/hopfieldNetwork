@@ -66,8 +66,9 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
         idx = int(self.N*flip_ratio)
         self.x[flip[0:idx]] *= -1
         
+        #calculate mean transition time 
         oldFit = -1
-        transitionTime = 0
+        transitionTime = [0]
         
         t = [0]
         overlap = [self.overlap(mu)]
@@ -85,20 +86,14 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
                 #print " ", self.overlap(j), "   ",
                 if (self.overlap(j) == 1.0):
                     if (oldFit == j):
-                        transitionTime += 1
+                        transitionTime[-1] += 1
                     else:
                         oldFit = j
-                        print j,":",transitionTime, " | "
-                        transitionTime = 0
+                        #print j,":",transitionTime, " | "                
+                        transitionTime.append(0)
             
             pixDist.append(self.pixelDistance(mu))
-            
-            # check the exit condition
-            #i_fin = i+1
-           # x_old = copy(self.x)
-            
-        #print 'pattern recovered in %i time steps with final overlap %.3f'%(i_fin,overlap[-1]) 
-        return -1
+        return mean(transitionTime)
     
     
 def testRun():
@@ -114,6 +109,14 @@ def varyLambda(lamda):
     h.setTau(tau = 8)
     h.initMemory()
     h.run(flip_ratio=0)
-    
-#if __name__ == "__main__":
-    
+def transTime(lamba, tu):
+	h = hopfieldNetworkAsymmetric(N=500) 
+	h.makePattern(P=10, ratio = 0.5, lamda = lamba)
+	h.setTau(tau = tu)
+	h.initMemory()
+	return h.run(flip_ratio=0)	
+def varyTau(lamda) : 
+	meanT = []
+	for t in range(1,20) : 
+		meanT.append(transTime(lamda, t) ) 
+	print meanT
