@@ -120,16 +120,23 @@
 
 \section{Exercise 2}
 \subsection{Exercise 2.2}
-We used the heaviside filter function.
-0.7 : 0->1->3, blocked at 3
-0.8 : 0->1->3->4, blocked at 4
-0.9 : sequencial behaviour
+We used the heaviside filter function. We had a bit
+of freedom to define {\it sequencial behaviour}. We decreased lambda to get the minimum value
+for which all pattern are visited. We found :
+\begin{center}
+$\lambda_{min} \approx 0.9$
+\end{center}
+For values below this one, the network get stuck in a particular pattern. Due to the random generation
+of some variables, the value of $\lambda_{min}$ is approximative.
 
-Definition of sequencial behaviour : all visited, equivalent to not more than 10 in the same
-state. We found $\lambda_{min} = 0.9$ (lot of try. Some time work some time not).
 
-For lamda max : sequencial behaviour : all state a visited with a overlap of 1, one after each other.
-We found $\lambda_{min} = 3.6$
+For the calculus of $\lambda_{max}$, we saw that for high lambda the network jump over some frame, not
+getting an overlap of one. Therefore we defined the sequencial behaviour as all state are visited with a overlap of 1, 
+one after each other.
+We found :
+\begin{center}
+$\lambda_{max} = 3.6$
+\end{center}
 \subsection{Exercice 2.3}
 
 
