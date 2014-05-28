@@ -16,13 +16,10 @@ class hopfieldNetwork:
         self.N = N
     
     def makePattern(self,P,ratio):
-        """
-        """
         self.pattern = -np.ones((P,self.N))
-        idx = int(ratio*self.N)
         for i in range(P):
-            self.pattern[i,:idx] = 1
-            self.pattern[i] = np.random.permutation(self.pattern[i])
+            self.pattern[i] = np.random.choice([1, -1], size=self.N, p=[ratio, 1 - ratio])
+        #print self.pattern
         self.makeWeight(P)
     
     def makeWeight(self, P):
@@ -212,29 +209,28 @@ def capacityEstimation():
 
 #ex1    
 def maxLoad():
-    Nlist = [100]
+    Nlist = [100,250,500]
     for N in Nlist:
         alphaList = []
-        for n in range(3):
-            h = hopfieldNetwork(N)
-            for P in range(1,51):
-                avrLoad = []
-                for i in range(10):
-                    meanError = []
-                    h.makePattern(P, frac)
-                    for mu in range(P):
-                        run = h.run(mu=mu,flip_ratio=0.1)
-                        if(run != -1):
-                            meanError.append(run)
-                        else:
-                            print "ERROR NOT CONVERGING"
-                    avr = np.mean(meanError)
-                    avrLoad.append(avr)
-                if (np.mean(avrLoad) > 2):
-                    alphaList.append(P/float(N))    
-                    print "N : ", N, "Pmax : ", P ,"alphaMax : ", P/float(N)
-                    break
-        print "N : ", N, "Alpha_max : ", np.mean(alphaList), "+/- ", stats.sem(alphaList), "\n"
+        h = hopfieldNetwork(N)
+        for P in range(1,51):
+            avrLoad = []
+            for i in range(10):
+                meanError = []
+                h.makePattern(P, frac)
+                for mu in range(P):
+                    run = h.run(mu=mu,flip_ratio=0.1)
+                    if(run != -1):
+                        meanError.append(run)
+                    else:
+                        print "ERROR NOT CONVERGING"
+                avr = np.mean(meanError)
+                avrLoad.append(avr)
+            if (np.mean(avrLoad) > 2):
+                alphaList.append(P/float(N))    
+                print "N : ", N, "Pmax : ", P ,"alphaMax : ", P/float(N), "+/- ", stats.sem(alphaList), "\n"
+                break
+    print "N : ", N, "Alpha_max : ", np.mean(alphaList), "+/- ", stats.sem(alphaList), "\n"
             
     
 if __name__ == "__main__":

@@ -31,7 +31,7 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
                 self.AsymWeight[i,j] = float(lamda)/self.N * sum
                 
     def makePattern(self,P,ratio, lamda):
-	self.P = P
+        self.P = P
         hopfieldNetwork.makePattern(self, P, ratio)
         self.makeAsymmetricWeight(P, lamda)
         
@@ -81,7 +81,7 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
             
             t.append(i+1)
            # overlap.append(self.overlap(mu)) #Matrice
-
+            #print ""
             for j in range(self.P):
                 #print " ", self.overlap(j), "   ",
                 if (self.overlap(j) == 1.0):
@@ -93,7 +93,7 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
                         transitionTime.append(0)
             
             pixDist.append(self.pixelDistance(mu))
-        return mean(transitionTime)
+        return mean(transitionTime[1:]) #We don't take the fist element of the list : because depend of the flip of start
     
     
 def testRun():
@@ -109,12 +109,27 @@ def varyLambda(lamda):
     h.setTau(tau = 8)
     h.initMemory()
     h.run(flip_ratio=0)
-def transTime(lamba, tu):
-	h = hopfieldNetworkAsymmetric(N=500) 
-	h.makePattern(P=10, ratio = 0.5, lamda = lamba)
-	h.setTau(tau = tu)
-	h.initMemory()
-	return h.run(flip_ratio=0)	
+def transTime():
+    file = open('transitionTime.dat','w')
+    h = hopfieldNetworkAsymmetric(N=500) 
+    lamdaList = [1.3, 1.7, 2.2, 2.5]
+    tauList = range(1,20)
+    for  lamdar in lamdaList:
+        for tu in tauList:
+            run = []
+            for r in range(5): #We to 5 run to be sure
+                h.makePattern(P=10, ratio = 0.5, lamda = lamdar)
+                h.setTau(tau = tu)
+                h.initMemory()
+                run.append(h.run(flip_ratio=0))
+                print run
+            strOut = str(lamdar)+"  "+str(tu)+"    "+str(mean(run))+"\n"
+            print  lamdar, "  ",tu,"    ", mean(run)
+            file.write(strOut)
+        file.write("\n\n")
+    
+    file.close()
+
 def varyTau(lamda) : 
 	meanTPerRun = []
 	meanT = []
