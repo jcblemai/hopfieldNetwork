@@ -8,7 +8,7 @@ from scipy import stats
 import cProfile
 from hopfieldNetwork import hopfieldNetwork
 
-tmax = 200
+tmax = 400
 
 def heaviside(x):
     if x == 0:
@@ -76,12 +76,14 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
             #print ""
             for j in range(self.P):
                 #print " ", self.overlap(j), "   ",
+                #if (self.overlap(j) > 0.7):
+                    #print j
                 if (self.overlap(j) == 1.0):
                     if (oldFit == j):
                         transitionTime[-1] += 1
                     else:
                         oldFit = j
-                        #print j,":",transitionTime, " | "                
+                        print j,":",transitionTime[-1]#, "|",
                         transitionTime.append(0)
             
             pixDist.append(self.pixelDistance(mu))
@@ -95,17 +97,20 @@ def testRun():
     h.initMemory()
     h.run(flip_ratio=0.1)
     
+#Ex 2.2
 def varyLambda(lamda):
     h = hopfieldNetworkAsymmetric(N = 500)
     h.makePattern(P=10, ratio = 0.5, lamda=lamda)
     h.setTau(tau = 8)
     h.initMemory()
     h.run(flip_ratio=0)
+    
+#Ex 2.3
 def transTime():
     file = open('transitionTime.dat','w')
     h = hopfieldNetworkAsymmetric(N=500) 
     lamdaList = [1.3, 1.7, 2.2, 2.5]
-    tauList = range(1,20)
+    tauList = range(1,25)
     for  lamdar in lamdaList:
         for tu in tauList:
             run = []
@@ -114,7 +119,7 @@ def transTime():
                 h.setTau(tau = tu)
                 h.initMemory()
                 run.append(h.run(flip_ratio=0))
-                print run
+                #print run
             strOut = str(lamdar)+"  "+str(tu)+"    "+str(mean(run))+"\n"
             print  lamdar, "  ",tu,"    ", mean(run)
             file.write(strOut)
@@ -122,13 +127,12 @@ def transTime():
     
     file.close()
 
-def varyTau(lamda) : 
-	meanTPerRun = []
-	meanT = []
-	for t in range(1,20) : 
-	#for each value of tau, run simulation 5 times and take average transition time 
-		for r in range(5) : 
-			meanTPerRun.append(transTime(lamda, t) ) 
-		meanT.append(mean(meanTPerRun)) 
-		meanTPerRun = []	
-		print t, " ", meanT[t-1]
+#Optional exercise
+def storageCapacity(nbPattern, N = 500):
+    h = hopfieldNetworkAsymmetric(N)
+    h.makePattern(P=nbPattern, ratio = 0.5, lamda = 1.5)
+    h.setTau(tau = 8)
+    h.initMemory()
+    h.run(flip_ratio=0)
+    
+    print "This alpha is ", float(nbPattern)/N

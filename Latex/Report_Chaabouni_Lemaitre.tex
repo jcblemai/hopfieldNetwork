@@ -188,6 +188,36 @@ $\lambda_{max} = 3.6$
 \end{center}
 \subsection{Exercice 2.3}
 
+\subsection{Exercice 2.4 : Sequence Storage Capacity}
+
+By varying $P$ with $N$ fixed, we saw that increasing the number of pattern stored lead the network
+to never acheive an overlap of $1$, or only for a few pattern (with $N = 500$ and $P = 40$ for example, only pattern, the $4$,
+was retrieved correctly). If we print the overlap we see that for a high $P$, the mean overlap is considerably lower (only 22 out of 400
+iteration sees their overlap over $0.7$ for $N = 500$ and $P = 50$, this number was 375 with the same setup, for $P = 10$). So transition
+from fully recovered patterns are our control behaviour to test the number of pattern we can store. 
+
+We fixed all the parameter of our network, except the number of pattern $P$ and the size of the
+network $N$. We then moved $P$ until one of the pattern stored was missed during an interation (this is our criterion
+but several can be chosen, like a threshold with the transition time between two pattern that get very long
+with $P$). The results are displayed on Table~\ref{capaseq}. Again due to the randomness of the process
+we show here statistical average, but on too few sample to be sure. 
+
+\begin{table}[h]\label{capaseq}
+\begin{center}
+\begin{math}
+    \begin{array}{|l|c|c|c|}
+    \hline
+    N & 250 & 500 & 1000 \\ \hline
+    P_{max} & 15 & 33 & 52 \\ \hline
+    \alpha_{max}& 0.06 & 0.066 & 0.052\\ \hline
+    \end{array}
+\end{math}
+\end{center}
+\caption{Sequence storage capacity  of a network of N neurons}
+\end{table}
+ We can compare those results to 
+
+
 \begin{thebibliography}{}
 \bibitem{prof} W. Gerstner, W. Kistler, R. Naud, L. Paninski, \textit{Neuronal Dynamics : from single neurons to networks and models of cognition}, Cambridge University Press, 2014.
 \end{thebibliography}
