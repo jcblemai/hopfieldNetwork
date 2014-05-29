@@ -16,21 +16,11 @@ class hopfieldNetwork:
         self.N = N
     
     def makePattern(self,P,ratio):
-        self.pattern = -np.ones((P,self.N))
-        for i in range(P):
-            self.pattern[i] = np.random.choice([1, -1], size=self.N, p=[ratio, 1 - ratio])
-        #print self.pattern
+        self.pattern = np.random.choice([1, -1], size=(P,self.N), p=[ratio, 1 - ratio])
         self.makeWeight(P)
     
     def makeWeight(self, P):
-        self.weight = np.zeros((self.N,self.N))
-        for i in range(self.N):
-            for j in range(self.N):
-                sum = 0
-                for k in range(P):
-                    sum += self.pattern[k,i]*self.pattern[k,j]
-                self.weight[i,j] = 1./self.N * sum
-                
+        self.weight = 1./self.N * (np.fromfunction(lambda i, j: (sum(self.pattern[k,i]*self.pattern[k,j] for k in range(P))), shape=(self.N,self.N), dtype = int).astype(double))
 
     def overlap(self, mu):
         return ((1./self.N)*sum(self.x*self.pattern[mu]))
