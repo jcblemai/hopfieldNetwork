@@ -200,27 +200,30 @@ def capacityEstimation():
 #ex1    
 def maxLoad():
     Nlist = [100,250,500]
+    # For every network... 
     for N in Nlist:
         alphaList = []
         h = hopfieldNetwork(N)
-        for P in range(1,51):
-            avrLoad = []
-            for i in range(10):
+        start = int(0.1*N)          #We choose a starting point not too far from the true value
+    
+        for trials in range(10):
+            for P in range(start, 100):     # ... we try to store different number of pattern...
                 meanError = []
                 h.makePattern(P, frac)
+                # We try to retrieve all the patterns
                 for mu in range(P):
                     run = h.run(mu=mu,flip_ratio=0.1)
                     if(run != -1):
                         meanError.append(run)
                     else:
                         print "ERROR NOT CONVERGING"
-                avr = np.mean(meanError)
-                avrLoad.append(avr)
-            if (np.mean(avrLoad) > 2):
-                alphaList.append(P/float(N))    
-                print "N : ", N, "Pmax : ", P ,"alphaMax : ", P/float(N), "+/- ", stats.sem(alphaList), "\n"
-                break
-    print "N : ", N, "Alpha_max : ", np.mean(alphaList), "+/- ", stats.sem(alphaList), "\n"
+                # We check if they are not correctly retrieved, if so we have our alpha max
+                if (np.mean(meanError) > 2):
+                    alphaList.append(P/float(N))    
+                    print "N : ", N," Run : ", trials, "Pmax : ", P ,"alphaMax : ", P/float(N), "\n"
+                    break
+            
+        print "------> N : ", N, "Alpha_max : ", np.mean(alphaList), "+/- ", stats.sem(alphaList), "\n"
             
     
 if __name__ == "__main__":

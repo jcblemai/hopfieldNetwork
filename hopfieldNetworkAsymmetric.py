@@ -21,15 +21,8 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
         hopfieldNetwork.__init__(self, N)
         
     def makeAsymmetricWeight(self, P, lamda):
-        self.AsymWeight = np.zeros((self.N,self.N))
-        for i in range(self.N):
-            for j in range(self.N):
-                sum = 0
-                for k in range(P-1):
-                    sum += self.pattern[k+1,i]*self.pattern[k,j]
-                sum += self.pattern[0,i]*self.pattern[P-1,j]        # We loop the last pattern w/ the first one.
-                self.AsymWeight[i,j] = float(lamda)/self.N * sum
-                
+        self.AsymWeight = float(lamda)/self.N * (np.fromfunction(lambda i, j: (sum(self.pattern[k+1,i]*self.pattern[k,j] for k in range(P-1)) + self.pattern[0,i]*self.pattern[P-1,j]), shape=(self.N,self.N), dtype = int).astype(double))
+        
     def makePattern(self,P,ratio, lamda):
         self.P = P
         hopfieldNetwork.makePattern(self, P, ratio)
@@ -46,9 +39,8 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
         Sbar = np.zeros(self.N)
         for k in range(t):
             Sbar += self.SPrev[:,t-k]*self.functionG(k)
-
-        self.x = sign(np.dot(self.weight, self.x) + np.dot(self.AsymWeight, Sbar))
         
+        self.x = sign(np.dot(self.weight, self.x) + np.dot(self.AsymWeight, Sbar))
         self.SPrev[:,t] = self.x
         
     def setTau(self, tau):
