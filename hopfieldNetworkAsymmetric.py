@@ -73,9 +73,9 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
             
             t.append(i+1)
            # overlap.append(self.overlap(mu)) #Matrice
-            #print ""
+            print ""
             for j in range(self.P):
-                #print " ", self.overlap(j), "   ",
+                print j," ", self.overlap(j), "   ",
                 #if (self.overlap(j) > 0.7):
                     #print j
                 if (self.overlap(j) == 1.0):
@@ -83,7 +83,7 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
                         transitionTime[-1] += 1
                     else:
                         oldFit = j
-                        print j,":",transitionTime[-1]#, "|",
+                        #print j,":",transitionTime[-1]#, "|",
                         transitionTime.append(0)
             
             pixDist.append(self.pixelDistance(mu))
@@ -92,7 +92,7 @@ class hopfieldNetworkAsymmetric(hopfieldNetwork):
     
 def testRun():
     h = hopfieldNetworkAsymmetric(N = 500)
-    h.makePattern(P=10, ratio = 0.5, lamda = 1.5)
+    h.makePattern(P=5, ratio = 0.5, lamda = 1.5)
     h.setTau(tau = 8)
     h.initMemory()
     h.run(flip_ratio=0.1)
