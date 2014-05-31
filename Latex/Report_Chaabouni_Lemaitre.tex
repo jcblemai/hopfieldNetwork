@@ -175,15 +175,15 @@ Note that we only retrieve one pattern at a time. If we want to retrieve a seque
 
 \subsection{Exercise 2.1 : Implementation}
 A lot of the function used for exercice 1 are reused for the 2. Here we want to 
-implement a particular type of Hopfield Network that have a compoment added : the assymetrical 
-weight. We used Oriented-Object Inheritance to derive our class hopfieldNetworkAsymmetric
+implement a particular type of Hopfield Network that have a compoment added : the Assymetrical 
+weights. We used Oriented-Object Inheritance to derive our class hopfieldNetworkAsymmetric
 from the hopfieldNetwork. Our attributes are the same than in the first part, with the addition
 of :
 \begin{itemize}
 \item Assymweight : array of $N\times N$ that represents the projections of the weight from a 
 pattern on the one of the next.
 \item SPrev : array of $N \times t_{max}$ that contain the evaluation of $S$ for all $t \in
- [0, now]$. It is used to calculate the $Sbar$ that will stabilize our transitions.
+ [0, now]$. It is used to calculate the $\overline{S}$ that will stabilize our transitions.
 \end{itemize}
 
 We add the following methods :
@@ -191,17 +191,25 @@ We add the following methods :
 \item [makeAssymetricWeight] calculates the projections of weights 
 on each other using the other weight according to the formula : 
 $w_{ij}^L = \frac{\lambda}{N}\sum_{\mu=1}^P \xi_i^{\mu+1} \xi_j^{\mu}$
-\item[dynamic] updates the state of neuron i according to the formula : $S_i = \textrm{sign}\big(\sum_{j=1}^N w_{ij}S_j\big)$ using the weight matrix and the current state of the network,
-TODO : Syncrone and Sbar
+\item [filterfunction] The implementation of our filter function. We choosed the heaviside function : $G(t) = \frac{1}{\tau} \Theta (-t + \tau)$
+\item[dynamic] It is a two step function that performs the evolution of the network for one step. Since we do syncronious update, all those variables are vectors. \\
+\begin{itemize}  
+    \item First we calculate the new  $\overline{S}$ from the memory of all previous states, as $\overline{S} = \sum_{t'=0}^{t} G(t')S(t-t')$
+    \item Then updates the state of all the neurons in one step, 
+according to the formula : $S_i = \textrm{sign}\big(\sum_{j=1}^N w_{ij}S_j + w_{ij}^L\overline{S} \big)$ using the
+two weights matrix with the current and filtered state of the network. 
+\end{itemize}
 \end{description}
 
-\begin{center}
-    \begin{figure}\label{transtime}
-    \caption{Illustration of the sequencial behaviour}
-    \includegraphics[scale=0.5]{img/ex21.png}
-    \end{figure}
-\end{center}
 
+\begin{figure}\label{seq}
+    \begin{center}
+    \caption{Illustration of the sequencial behaviour}
+    \includegraphics[scale=0.3]{img/ex21.png}
+    \end{center}
+\end{figure}
+The process is the same as in exercice 1. If we plot the overlap for all the patterns at every
+time step, we see that our network goes from one storred pattern to another (Figure~\ref{seq})
 
 
 \subsection{Exercise 2.2 : $\lambda$ range estimation}
@@ -233,12 +241,14 @@ $\tau \in [1, 25]$), saving the transition time on a file to plot it with gnuplo
 is displayed in Figure~\ref{transtime}. If we discart the small value of $\tau < 5$, we
 see a linear behaviour, the transition time increasing with $\tau$. The slope is fixed by other parameters,
 and $\lambda$ gives a shift of downward to the curve curve.
-\begin{center}
-    \begin{figure}\label{transtime}
+
+\begin{figure}\label{transtime}
+    \begin{center}
     \caption{Mean retrieval error as a function of the flip ration $c\in[0.01, 0.51]$.  }
     \includegraphics[scale=0.5]{img/ex23.png}
-    \end{figure}
-\end{center}
+    \end{center}
+\end{figure}
+
 
 \subsection{Exercice 2.4 : Sequence Storage Capacity}
 
