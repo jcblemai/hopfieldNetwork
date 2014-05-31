@@ -1,5 +1,5 @@
 #Authors : Miryam Chaabouni and Joseph Lemaitre
-#Inspired from a work found on moodle.
+#Inspired from a work found on moodle, by L.Ziegler
 
 from PIL import Image
 from copy import copy
@@ -42,13 +42,14 @@ class hopfieldNetwork:
     
     def makeWeight(self, P):
         """
-        Build the N*N weight matrix according to the theorical formula.
+        Build the N*N weight matrix according to the theorical formula, in a fast way with numpy
         """
         
         # The lambda expression return the sum we need for the weight. It gets in argument the indices i and j by numpy (so we need the matrix
         # to be int). We convert it as a double so we can divide by 1/N. 
         self.weight = 1./self.N * (
-            np.fromfunction(lambda i, j: (sum(self.pattern[k,i]*self.pattern[k,j] for k in range(P))), shape=(self.N,self.N), dtype = int).astype(double))
+            np.fromfunction(lambda i, j: (sum(self.pattern[k,i]*self.pattern[k,j] for k in range(P))), shape=(self.N,self.N), dtype = int).astype(double)
+                                  )
 
     def overlap(self, mu):
         """

@@ -1,13 +1,17 @@
 hopfieldNetwork
 ===============
 
-Miniproject for the course Biological Modelling of Neural Network @EPFL
+Miniproject for the course Biological Modelling of Neural Network @EPFL. 
+
+hopfieldNetwork.py : classic implementation of a hopfield network
+hopfieldNetworkAssymetric.py : Assymetric modification of the implementation to retrieve sequence of patterns
 
 
 To run with :
 ipython --pylab=[gtk][qt]
-import hopfield
-h = hopfield.hopfield_network(4)
-h.make_pattern(5)
-h.run()
+
+import hopfieldNetwork as h
+import hopfieldNetworkAssymetric as hA
+
+and play with it.
 
