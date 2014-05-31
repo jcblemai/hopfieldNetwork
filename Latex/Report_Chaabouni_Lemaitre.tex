@@ -108,8 +108,8 @@ We created a class hopfieldNetwork which has the following attributes :
 and the following functions : 
 \begin{description}
 \item [\_\_init\_\_] creates an instance of the class hofieldNetwork with the number of neurons N 
-\item [makePattern] creates a numpy array of N$\times$P of ones, then randomly flips a given ratio of neurons in each pattern using the function numpy.random.choice. 
-\item [makeWeight] calculates the interaction weights using simple for loops according to the formula : $w_{ij} = \frac{1}{N}\sum_{m=1}^P \xi_i^{\mu} \xi_j^{\mu}$
+\item [makePattern] creates a numpy array of N$\times$P with a given ratio of neurons with value 1 and the other at -1, using the function numpy.random.choice. 
+\item [makeWeight] calculates the interaction weights using numpy.fromfunction and a lambda according to the formula : $w_{ij} = \frac{1}{N}\sum_{m=1}^P \xi_i^{\mu} \xi_j^{\mu}$
 \item[dynamic] updates the state of neuron i according to the formula : $S_i = \textrm{sign}\big(\sum_{j=1}^N w_{ij}S_j\big)$ using the weight matrix and the current state of the network
 
 \end{description}
@@ -117,11 +117,12 @@ and the following functions :
 After creating an instance of the class hopfieldNework and creating the desired number of patterns, we run the simulation using the run function which does the following steps : 
 \begin{enumerate}
 \item initialize the network by copying one of the patterns $\xi^{\mu}$ then flipping the state of randomly chosen neurons 
-\item Select a random neuron and update its state using the dynamic function, and do this for all the neurons of the network
+\item For all the neurons in the network, in a random order : we update its state using the dynamic function
 \item repeat until convergence
 \end{enumerate}
-For the convergence criterion, we store the value of the network x at each step, and after each iteration we compare the old value of x to the new one by a simple subtraction. If the difference is negligible, we stop. In addition, we set a time limit tmax = 100 steps, so that we exit even if the model doesn't converge. \\
-The runAndPlot function performs the same steps as run, but plot at the same time the network and illustrates the convergence in a overlap w.r.t. time curve. \\
+For the convergence criterion, we store the value of the network $x$ at each step, and after each iteration we compare 
+the old value of $x$ to the new one by a simple subtraction. If the difference is negligible, we stop. In addition, we set a time limit $t_{max} = 100$ 
+steps, to exit even if the model doesn't converge. \\
 At each time step, we store the value of the overlap and the normalized pixel distance which will be useful later. \\
  
 \subsection{Exercise 1.2 : Pattern retrieval }
@@ -132,10 +133,15 @@ At this step we add two functions :
 \end{description}
 
 To get the retrieval error as a function of the ratio $c$ of the flipped bits at the initialization of the network, we define the function patternRetrieval. \\
-We fix N=200 and P = 5. We take 50 values of c in the interval [0.01, 0.51]. For each value of c, we get run the simulation 50 times, and get the pixel distance at the end of each simulation. We show the average of the retrieval error in figure \ref{reterr}. The error bar represents the standard error of the mean, and is given by SciPy function stats.sem. \\
-As we could expect it, the error is negligible ($<1\%$) if we flip a reasonable ratio of the neurons at the initialization step. According to the figure, this threshold value is $c = 0.35$. As the number of flipped neurons increases, the error grows exponentially. For $c=0.5$, meaning that we start with a network where half of the neurons are different from the retrieved pattern, the error reaches 100$\%$. \\
-(What happens when m=-1???)\\
-We conclude that the Hopfield model works well only if the initial state of the Network is close to the target pattern.
+We fix N = 200 and P = 5. We take 50 values of c in the interval [0.01, 0.51]. For each value of c, we run the simulation 50 times, and get the pixel distance 
+at the end of each simulation. We show the average of the retrieval error in figure \ref{reterr}. 
+The error bar represents the standard error of the mean, and is given by SciPy function stats.sem. This error is small here because for each configuration
+N,P,c, we averaged over 50 realisations. We could do this because the code was fast.\\
+As we could expect it, the error is negligible ($<1\%$) if we flip a reasonable 
+ratio of the neurons at the initialization step. According to the figure, the threshold value is around $c = 0.35$. As the number of flipped neurons increases, the error grows exponentially. 
+For $c=0.5$, meaning that we start with a network where half of the neurons are different from the retrieved pattern, the error reaches 100$\%$. \\
+We conclude that the Hopfield model works well only if the initial state of the Network is close to the target pattern. That's in accordance with the 
+associative memory theory : since it's content addressed data, we need to start near the data we want to retrieve.
 \begin{center}
     \begin{figure}\label{reterr}
     \caption{Mean retrieval error as a function of the flip ration $c\in[0.01, 0.51]$.  }
@@ -144,12 +150,18 @@ We conclude that the Hopfield model works well only if the initial state of the 
 \end{center}
 
 \subsection{Exercise 1.3 : Capacity estimation}
-The number of patterns that can be stored and retrieved correctly by a neurons network depends on the number of neurons. In Hofield model, the storage capacity of a network is defined by :
+The number of patterns that can be stored and retrieved correctly by a neurons network depends on the number of neurons. 
+In Hofield model, the storage capacity of a network is defined by :
 \begin{equation}\nonumber
 C_{stor} =\frac{ P^{max}}{N}
 \end{equation} 
 where $P^{max}$ is the maximum number of patterns that the network can retrieve correctly. \\
-To study this capacity, we define the function maxLoad. To obtain the capacity of the Hopfield Network, we create a network of N neurons and a growing number of patterns $P \leq 51$.  We fix $c=0.1$. For each $P$ we try to retrieve a random pattern 10 times and we get the mean error. When the mean error reaches $2\%$ we stop and save the number of patterns created $P_{max}$. To speed up the simulation, we start from P=???. Finally, we calculate the average value of $P_{max}$ for a given $N$, and we calculate the maximal load $\alpha_{max} = P_{max}/N$. We will do this for several values of N. The results are shown in table \ref{capa}.  
+To study this capacity, we define the function maxLoad. We create a network of N neurons and a growing number of patterns $P$.  
+We fix $c=0.1$. For each $P$ we try to retrieve all the patterns. When the mean error for all those try reaches $2\%$ we stop and save the number 
+of patterns created as $P_{max}$. We do this $10$ times per N to have statistical average of $P_{max}$ and $\alpha_{max} = P_{max}/N$
+To speed up the simulation, we start from $P = 0.1 N$ because we are sure that a network with 500 neurons will be able to
+retrieve correctly at least 50 (and less pattern). If this assumption was false, we would have known by analysing the ouput of the program.
+The results are shown in table \ref{capa}.  
 \begin{table}[h]\label{capa}
 \begin{center}
 \begin{math}
@@ -158,7 +170,6 @@ To study this capacity, we define the function maxLoad. To obtain the capacity o
     N & 100 & 250 & 500 \\ \hline
     P_{max} & \approx 14 & \approx 38 &  \approx 77 \\ \hline
     \alpha_{max} & 0.1480 \pm  0.007423 & 0.1532 \pm  0.003322 &  0.1546 \pm  0.001550 \\ \hline
-    \alpha_{th} & - & - & - \\ \hline
     \end{array}
 \end{math}
 \end{center}
@@ -232,13 +243,15 @@ $\lambda_{max} = 3.6$
 \end{center}
 
 \subsection{Exercice 2.3 : Estimation of the transition time}
-The transition time (i.e the time the network stay in a given frame with a overlap of 1
-before trying t catch another) depend on $\tau$, the filter function parameter and 
+The transition time (that we defined as the time the network stay in a given frame with a overlap of 1
+before trying to catch another) depend on $\tau$, the filter function parameter and 
 on $\lambda$.
 
 We run our network 5 times for each configuration ($\lambda \in [1.3, 1.7, 2.2, 2.5]$ and 
-$\tau \in [1, 25]$), saving the transition time on a file to plot it with gnuplot. The result
-is displayed in Figure~\ref{transtime}. If we discart the small value of $\tau < 5$, we
+$\tau \in [1, 25]$), saving the transition time on a file to plot it with gnuplot. 
+
+The results
+are displayed in Figure~\ref{transtime}. If we discard the small values of $\tau < 5$, we
 see a linear behaviour, the transition time increasing with $\tau$. The slope is fixed by other parameters,
 and $\lambda$ gives a shift of downward to the curve curve.
 
@@ -253,7 +266,7 @@ and $\lambda$ gives a shift of downward to the curve curve.
 \subsection{Exercice 2.4 : Sequence Storage Capacity}
 
 By varying $P$ with $N$ fixed, we saw that increasing the number of pattern stored lead the network
-to never acheive an overlap of $1$, or only for a few pattern (with $N = 500$ and $P = 40$ for example, only pattern, the $4$,
+to never acheive an overlap of $1$, or only for a few pattern (with $N = 500$ and $P = 40$ for example, only one pattern, the $4$,
 was retrieved correctly). If we print the overlap we see that for a high $P$, the mean overlap is considerably lower (only 22 out of 400
 iteration sees their overlap over $0.7$ for $N = 500$ and $P = 50$, this number was 375 with the same setup, for $P = 10$). So transition
 from fully recovered patterns are our control behaviour to test the number of pattern we can store. 

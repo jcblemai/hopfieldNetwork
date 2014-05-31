@@ -106,7 +106,7 @@ class hopfieldNetwork:
                 self.dynamic(k)
                 
             #Update our data list
-            t.append(i+1)
+            t.append(i + 1)
             overlap.append(self.overlap(mu))
             pixDist.append(self.pixelDistance(mu))
             
