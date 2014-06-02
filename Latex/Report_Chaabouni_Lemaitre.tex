@@ -202,8 +202,7 @@ $w_{ij}^L = \frac{\lambda}{N}\sum_{\mu=1}^P \xi_i^{\mu+1} \xi_j^{\mu}$
 \begin{enumerate}
     \item Calculate the new  $\overline{S}$ from the memory of all previous states, as $\overline{S} = \sum_{t'=0}^{t} G(t')S(t-t')$
     \item Update the state of all the neurons in one step, 
-according to the formula : $S_i = \textrm{sign}\big(\sum_{j=1}^N w_{ij}S_j + w_{ij}^L\overline{S} \big)$ using the
-two weights matrix with the current and filtered state of the network. 
+according to the formula : $S_i = \textrm{sign}\big(\sum_{j=1}^N w_{ij}S_j + w_{ij}^L\overline{S} \big)$ using the two weights matrix with the current and filtered state of the network
 \end{enumerate}  
 \end{description}
 
@@ -224,13 +223,13 @@ Keeping N=500,P=10 and $\tau$=8 fixed, we simulate the network with different va
 \begin{center}
 $\lambda_{min} \approx 0.9$
 \end{center}
-Due to the random generation of some variables, the value of $\lambda_{min}$ is approximative.
 For values below this one, the network gets stuck in a particular pattern. This is in accordance with the new weights formula. When $\lambda$ is very low, the additional term becomes negligible and we are back to the previous model, where we converged to one specific pattern. \\ 
 For high values of $\lambda$, we observe that the network skips some patterns, meaning that the overlap $m^{\mu}$ increases but does not reach 1. Here the influence from the previous pattern is too strong, and the model becomes unstable. We found :
 \begin{center}
-$\lambda_{max} = 3.6$
+$\lambda_{max} \approx 3.6$
 \end{center}
-\subsection{Exercice 2.3 : Estimation of the transition time}
+Due to the random generation of some variables, the values of $\lambda_{min}$ and $\lambda_{max}$ are approximative.
+\subsection{Exercise 2.3 : Estimation of the transition time}
 The transition time (that we defined as the time the network stays in a given frame with a overlap of 1) depends on the filter function parameter $\tau$, and on $\lambda$.
 
 We run our network 5 times for each configuration ($\lambda \in [1.3, 1.7, 2.2, 2.5]$ and 
@@ -248,19 +247,13 @@ The slope of the curve is fixed by other parameters.
 \end{figure}
 
 
-\subsection{Exercice 2.4 : Sequence Storage Capacity}
+\subsection{Exercise 2.4 : Sequence Storage Capacity}
 
 By varying $P$ with $N$ fixed, we saw that increasing the number of patterns stored leads the network
-to never achieve an overlap of 1, or only for a few patterns (with $N = 500$ and $P = 40$ for example, only one pattern, the $4$,
-was retrieved correctly). If we print the overlap we see that for a high $P$, the mean overlap is considerably lower (only 22 out of 400
-iteration sees their overlap over $0.7$ for $N = 500$ and $P = 50$, this number was 375 with the same set-up, for $P = 10$). So transition
-from fully recovered patterns are our control behaviour to test the number of pattern we can store. 
-
-We fixed all the parameter of our network, except the number of pattern $P$ and the size of the
-network $N$. We then moved $P$ until one of the pattern stored was missed during an iteration (this is our criterion
-but several can be chosen, like a threshold with the transition time between two pattern that get very long
-with $P$). The results are displayed on Table~\ref{capaseq}. Again due to the randomness of the process
-we show here statistical average, but on too few sample to be sure. 
+to never achieve an overlap of 1, or only for a few patterns. For example with $N = 500$ and $P = 40$ only one pattern, the $4^{th}$, was retrieved correctly. If we print the overlap we see that for a high $P$, the mean overlap is considerably low. \\
+We fixed all the parameters of our network, except the number of patterns $P$ and the size of the
+network $N$. For every N we increased $P$ until one of the pattern stored was skipped during an iteration. The results are displayed on Table~\ref{capaseq}. Again due to the randomness of the process
+we show here statistical average, on a small number of trials. 
 
 \begin{table}[h]\label{capaseq}
 \begin{center}
